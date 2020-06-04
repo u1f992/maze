@@ -1,13 +1,10 @@
 Attribute VB_Name = "Module1"
 Option Explicit
 
-'trueにするとスタートとゴールを入力できる
-Public GlobalToolSwitch As Boolean
-'設定し終えたらtrue
-Public SetStart As Boolean
-Public SetGoal As Boolean
-
-Public size As Long
+'迷路の内側の1辺
+'必ず奇数
+'迷路全体のサイズはsize+2になる
+Const size As Long = 101
 
 Public Start As Range
 Public Goal As Range
@@ -30,7 +27,6 @@ Const EAST As Long = 2
 Const SOUTH As Long = 3
 Const WEST As Long = 4
 
-
 Sub main()
     
     ReDim listCandidate(0 To 0)
@@ -40,94 +36,23 @@ Sub main()
     
     DefaultHeightWidth
     
-    GlobalToolSwitch = False
-    SetStart = False
-    SetGoal = False
-    
-    '壁に1
-    '通路に0
-    '建設中の壁を2
-    '要素数5以上
-    Dim maze() As Integer
-    
     Dim Target As Range
-    
-'    Dim temp As String
-'    temp = InputBox("サイズを3以上の奇数で入力してください。")
-'
-'    If temp <> "" Then
-'        If IsNumeric(temp) = True Then
-'            size = CLng(temp)
-'        Else
-'            Exit Sub
-'        End If
-'    End If
-'
-'    If size < 3 Then
-'        size = 3
-'    End If
-'    If size Mod 2 = 0 Then
-'        size = size + 1
-'    End If
-    
-    '自動でサイズを決定する
-'    Do While True
-'        Randomize
-'        size = Int((201 - 181 + 1) * Rnd + 181) 'Int((51 - 3 + 1) * Rnd + 3)
-'        If size Mod 2 <> 0 Then
-'            Exit Do
-'        End If
-'    Loop
 
-    size = 501
     Set RangeMaze = Range(Cells(1, 1), Cells(size + 2, size + 2))
     
-'    Dim t As Double
-'    t = Timer
-
     Application.StatusBar = "迷路を生成しています..."
     
     'MakeMaze
     MakeMaze
-    Cells(size + 3, size + 3).Select
-    
-    'MsgBox Round(Timer - t, 2) & " sec."
-    
-    'SetNext
-'    MsgBox "スタート地点を選択してください。"
-'    GlobalToolSwitch = True
-'    Do While GlobalToolSwitch = True
-'        DoEvents
-'    Loop
-    
-    'ランダムに開始地点と終了地点を指定する
     
     Application.StatusBar = "スタート/ゴール地点を設定しています..."
-    
-'    Randomize
-'    Set Target = Cells(Int((size + 2 - 1 + 1) * Rnd + 1), Int((size + 2 - 1 + 1) * Rnd + 1))
-'    Do While Target.Interior.Color = RGB(0, 0, 0)
-'        Randomize
-'        Set Target = Cells(Int((size + 2 - 1 + 1) * Rnd + 1), Int((size + 2 - 1 + 1) * Rnd + 1))
-'    Loop
-'
-'    Set Start = Target
-'    Start.Interior.Color = RGB(0, 255, 0)
-'
-'    Randomize
-'    Set Target = Cells(Int((size + 2 - 1 + 1) * Rnd + 1), Int((size + 2 - 1 + 1) * Rnd + 1))
-'    Do While Target.Interior.Color = RGB(0, 0, 0)
-'        Randomize
-'        Set Target = Cells(Int((size + 2 - 1 + 1) * Rnd + 1), Int((size + 2 - 1 + 1) * Rnd + 1))
-'    Loop
-'    Set Goal = Target
 
     Set Start = Cells(2, 2)
     Start.Interior.Color = RGB(0, 255, 0)
     
     Set Goal = Cells(size + 1, size + 1)
     Goal.Interior.Color = RGB(255, 0, 0)
-    Stop
+    
     Application.StatusBar = "最短経路探索を行います..."
         
     SetNext Start
@@ -158,6 +83,9 @@ Function MakeMaze()
     '迷路の初期化
     RangeMaze.Rows.RowHeight = 5 * 0.75
     RangeMaze.Columns.ColumnWidth = 5 * 0.07
+    
+    Cells(size + 3, size + 3).Select
+    
     '外周を壁に
     RangeMaze.Interior.Color = BUILT
     Range(RangeMaze.Cells(2, 2), RangeMaze.Cells(RangeMaze.Rows.Count - 1, RangeMaze.Columns.Count - 1)).ClearFormats
@@ -316,93 +244,6 @@ Function BoolReset(ByRef arr() As Boolean)
     For i = LBound(arr) To UBound(arr)
         arr(i) = False
     Next i
-    
-End Function
-
-Function BoolSwitch(ByRef arr() As Boolean, ByVal num As Long)
-    
-    Dim i As Long
-    For i = LBound(arr) To UBound(arr)
-        If i = num Then
-            arr(i) = True
-        Else
-            arr(i) = False
-        End If
-    Next i
-    
-End Function
-
-Function str2coordinate(ByVal str As String, ByRef vertical As Long, ByRef horizontal As Long)
-
-    vertical = CLng(Left(str, InStr(str, ",") - 1))
-    horizontal = CLng(Mid(str, InStr(str, ",") + 1))
-    
-End Function
-
-'添え字numを削除
-'ただし要素数が1(添え字0)の場合、内容をvbNullStringにする
-Function CloseGap(ByRef arr() As String, ByVal num As Long) As String()
-    
-    Dim i As Long
-    Dim flag As Boolean
-    flag = False '消すまでfalse、過ぎたらTrue
-    Dim copy() As String
-    
-    If UBound(arr) = 0 Then
-        ReDim copy(0 To 0)
-        copy(0) = vbNullString
-        CloseGap = copy
-        Exit Function
-    End If
-    
-    For i = LBound(arr) To UBound(arr)
-        If i <> num Then
-            If flag = False Then
-                ReDim Preserve copy(LBound(arr) To i)
-                copy(i) = arr(i)
-            Else
-                ReDim Preserve copy(LBound(arr) To i - 1)
-                copy(i - 1) = arr(i)
-            End If
-        Else
-            flag = True
-        End If
-    Next i
-    
-    CloseGap = copy
-    
-End Function
-
-'ただし要素数が1(添え字0)の場合、内容をvbNullStringにする
-Function CloseGapByVal(ByRef arr() As String, ByVal val As String) As String()
-    
-    Dim i As Long
-    Dim flag As Boolean
-    flag = False '消すまでfalse、過ぎたらTrue
-    Dim copy() As String
-    
-    If UBound(arr) = 0 Then
-        ReDim copy(0 To 0)
-        copy(0) = vbNullString
-        CloseGapByVal = copy
-        Exit Function
-    End If
-    
-    For i = LBound(arr) To UBound(arr)
-        If arr(i) <> val Then
-            If flag = False Then
-                ReDim Preserve copy(LBound(arr) To i)
-                copy(i) = arr(i)
-            Else
-                ReDim Preserve copy(LBound(arr) To i - 1)
-                copy(i - 1) = arr(i)
-            End If
-        Else
-            flag = True
-        End If
-    Next i
-    
-    CloseGapByVal = copy
     
 End Function
 
