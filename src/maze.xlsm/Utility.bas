@@ -75,3 +75,12 @@ Function ArrDelete(ByRef arr() As Range, ByVal Target As Range) As Range()
     ArrDelete = copy
     
 End Function
+
+'arr()‚ğ‚Ğ‚Æ‚ÂL‚°‚Ä“ü‚ê‚é‚¾‚¯
+Function ArrAdd(ByRef arr() As Range, ByVal Target As Range) As Range()
+    ReDim Preserve arr(0 To UBound(arr) + 1)
+    Set arr(UBound(arr)) = Target
+    
+    ArrAdd = arr
+    
+End Function

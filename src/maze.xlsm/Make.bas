@@ -27,8 +27,7 @@ Function MakeMaze()
     For i = 3 To SIZE - 2 Step 2
         For j = 3 To SIZE - 2 Step 2
             
-            ReDim Preserve Knots(0 To UBound(Knots) + 1)
-            Set Knots(UBound(Knots)) = Cells(i, j)
+            Knots = ArrAdd(Knots, Cells(i, j))
             
         Next j
     Next i
@@ -65,8 +64,7 @@ Function MakeMaze()
         '◎壁伸ばし処理
         '壁候補を新規壁に
         Selected.Interior.Color = BUILDING
-        ReDim Preserve TempWalls(0 To UBound(TempWalls) + 1)
-        Set TempWalls(UBound(TempWalls)) = Selected
+        TempWalls = ArrAdd(TempWalls, Selected)
         
         '進行方向をランダムに決定
         BoolReset CantEnter
@@ -91,9 +89,7 @@ Function MakeMaze()
             If Target.Interior.Color = BUILT Then '進行先が既存壁の場合
                 '進行先を新規壁にして確定
                 Range(Cells(vTemp, hTemp), Target).Interior.Color = BUILDING
-                
-                ReDim Preserve TempWalls(0 To UBound(TempWalls) + 1)
-                Set TempWalls(UBound(TempWalls)) = Range(Cells(vTemp, hTemp), Target)
+                TempWalls = ArrAdd(TempWalls, Range(Cells(vTemp, hTemp), Target))
                 
                 Exit Do
                 
@@ -113,9 +109,7 @@ Function MakeMaze()
             Else '通路の場合
                 '進行先を新規壁にする
                 Range(Cells(vTemp, hTemp), Target).Interior.Color = BUILDING
-                
-                ReDim Preserve TempWalls(0 To UBound(TempWalls) + 1)
-                Set TempWalls(UBound(TempWalls)) = Range(Cells(vTemp, hTemp), Target)
+                TempWalls = ArrAdd(TempWalls, Range(Cells(vTemp, hTemp), Target))
                 
                 '使用された壁候補はリストから削除
                 If UBound(Knots) <> 1 Then

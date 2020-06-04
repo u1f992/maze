@@ -1,12 +1,6 @@
 Attribute VB_Name = "Solve"
 Option Explicit
 
-'進行候補(水色の部分)を管理
-Public TempSearch() As Range
-
-'辿ってきた道
-Public TempRoute As Range
-
 '四方を探索
 '探索するセルのリストを作成
 Function SearchSet(ByVal Target As Range) As Boolean
@@ -34,11 +28,7 @@ Function SearchSet(ByVal Target As Range) As Boolean
             Directions(i).Interior.Color = SEARCHING
             Directions(i).Value = Target.Value + 1
             
-            '添え字は1から始まる、0には空白のデータ
-            '要素数が0になるとまずいため
-            
-            ReDim Preserve TempSearch(0 To UBound(TempSearch) + 1)
-            Set TempSearch(UBound(TempSearch)) = Directions(i)
+            TempSearch = ArrAdd(TempSearch, Directions(i))
             
         End If
     Next i
