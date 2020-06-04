@@ -12,8 +12,8 @@ End Function
 '’Tõ’†‚ğ’TõÏ‚İ‚É‚·‚é
 Function AllCellsChecked()
     Dim i As Long
-    For i = LBound(Candidates) + 1 To UBound(Candidates)
-        Candidates(i).Interior.Color = SEARCHED
+    For i = LBound(TempSearch) + 1 To UBound(TempSearch)
+        TempSearch(i).Interior.Color = SEARCHED
     Next i
 End Function
 

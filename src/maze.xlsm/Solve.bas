@@ -1,6 +1,12 @@
 Attribute VB_Name = "Solve"
 Option Explicit
 
+'進行候補(水色の部分)を管理
+Public TempSearch() As Range
+
+'辿ってきた道
+Public TempRoute As Range
+
 '四方を探索
 '探索するセルのリストを作成
 Function SearchSet(ByVal Target As Range) As Boolean
@@ -31,15 +37,16 @@ Function SearchSet(ByVal Target As Range) As Boolean
             '添え字は1から始まる、0には空白のデータ
             '要素数が0になるとまずいため
             
-            ReDim Preserve Candidates(0 To UBound(Candidates) + 1)
-            Set Candidates(UBound(Candidates)) = Directions(i)
+            ReDim Preserve TempSearch(0 To UBound(TempSearch) + 1)
+            Set TempSearch(UBound(TempSearch)) = Directions(i)
             
         End If
     Next i
     
+    '探索済みのセルをリストから削除
     If Target.Interior.Color <> START.Interior.Color Then
         Target.Interior.Color = SEARCHED
-        Candidates = ArrDelete(Candidates, Target)
+        TempSearch = ArrDelete(TempSearch, Target)
     End If
     
 End Function
@@ -54,20 +61,23 @@ Function SearchGet() As Range
     Dim vTemp As Long
     Dim hTemp As Long
     
-    For i = LBound(Candidates) + 1 To UBound(Candidates)
-        'If minimum >= Candidates(i).Value + CLng(Sqr((Abs(Candidates(i).Row - Goal.Row)) ^ 2 + (Abs(Candidates(i).Row - Goal.Row)) ^ 2)) Then 'スタートからの距離+ゴールまでの距離(直線距離)
-        If minimum >= Candidates(i).Value + Abs(Candidates(i).Row - GOAL.Row) + Abs(Candidates(i).Row - GOAL.Row) Then 'スタートからの距離+ゴールまでの距離(辺の合計)
-            minimum = Candidates(i).Value + CLng(Sqr((Abs(Candidates(i).Row - GOAL.Row)) ^ 2 + (Abs(Candidates(i).Row - GOAL.Row)) ^ 2))
+    For i = LBound(TempSearch) + 1 To UBound(TempSearch)
+        'If minimum >= TempSearch(i).Value + CLng(Sqr((Abs(TempSearch(i).Row - Goal.Row)) ^ 2 + (Abs(TempSearch(i).Row - Goal.Row)) ^ 2)) Then 'スタートからの距離+ゴールまでの距離(直線距離)
+        If minimum >= TempSearch(i).Value + Abs(TempSearch(i).Row - GOAL.Row) + Abs(TempSearch(i).Row - GOAL.Row) Then 'スタートからの距離+ゴールまでの距離(辺の合計)
+            minimum = TempSearch(i).Value + CLng(Sqr((Abs(TempSearch(i).Row - GOAL.Row)) ^ 2 + (Abs(TempSearch(i).Row - GOAL.Row)) ^ 2))
             
-            Set SearchGet = Candidates(i)
+            Set SearchGet = TempSearch(i)
             
         End If
     Next i
     
 End Function
 
-'スタートまで帰る
-Function Back2Start(ByVal Target As Range) As Range
+Function SolveSet(ByVal Target As Range) As Boolean
+    
+    SolveSet = False
+    
+    '左右上下のセルから、各セルの値(スタートまでの距離)が小さいものを選択
     
     Dim Directions(NORTH To WEST) As Range
     Set Directions(NORTH) = Target.Cells(0, 1)
@@ -80,7 +90,7 @@ Function Back2Start(ByVal Target As Range) As Range
     
     For i = NORTH To WEST '4方向にスタートがあれば終了
         If Directions(i).Interior.Color = START.Interior.Color Then
-            Solved = True
+            SolveSet = True
             Exit Function
         End If
         
@@ -90,10 +100,13 @@ Function Back2Start(ByVal Target As Range) As Range
     
     Dim s As Long
     s = Smallest(val) '各セルの値が最も小さいものを選択
-    Directions(s).Interior.Color = ROUTE
-    
-    Set Back2Start = Directions(s)
+    Set TempRoute = Directions(s)
     
 End Function
 
-
+Function SolveGet() As Range
+    
+    TempRoute.Interior.Color = ROUTE
+    Set SolveGet = TempRoute
+    
+End Function

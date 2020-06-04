@@ -24,8 +24,12 @@ Private Sub Workbook_Open()
     
 End Sub
 
-Private Sub Workbook_AfterSave(ByVal Success As Boolean)
+Private Sub Workbook_BeforeSave(ByVal SaveAsUI As Boolean, Cancel As Boolean)
+    DefaultHeightWidth
+End Sub
 
+Private Sub Workbook_AfterSave(ByVal Success As Boolean)
+    
     Dim objShell As New IWshRuntimeLibrary.WshShell
     Dim ret As WshExec
     

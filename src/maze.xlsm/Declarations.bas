@@ -3,16 +3,11 @@ Option Explicit
 
 '迷路の1辺
 '必ず奇数
-Public Const SIZE As Long = 103
+Public Const SIZE As Long = 53
 Public RangeMaze As Range
 
 Public START As Range
 Public GOAL As Range
-
-Public Solved As Boolean
-
-'進行候補(水色の部分)を管理
-Public Candidates() As Range
 
 '色定数
 Public Const BUILT As Long = 0

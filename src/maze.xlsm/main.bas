@@ -5,9 +5,7 @@ Sub Main()
     
     DefaultHeightWidth
     
-    ReDim Candidates(0 To 0)
-    
-    Solved = False
+    ReDim TempSearch(0 To 0)
 
     Set RangeMaze = Range(Cells(1, 1), Cells(SIZE, SIZE))
     
@@ -29,21 +27,11 @@ Sub Main()
     Do While SearchSet(SearchGet) = False
         DoEvents
     Loop
-    
-    Dim Target As Range
-    Set Target = Back2Start(GOAL)
-    Do While Solved = False
-        Set Target = Back2Start(Target)
+
+    SolveSet GOAL
+    Do While SolveSet(SolveGet) = False
         DoEvents
     Loop
-    
-'    Function SolveSet(ByVal Target As Range) As Boolean
-'    Function SolveGet() As Range
-
-'    SolveSet START
-'    Do While SolveSet(SolveGet) = False
-'        DoEvents
-'    Loop
     
     Application.StatusBar = "ç≈íZåoòHÇíTçıÇµÇ‹ÇµÇΩÅB"
     
