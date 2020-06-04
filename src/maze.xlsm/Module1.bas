@@ -4,23 +4,18 @@ Option Explicit
 '迷路の1辺
 '必ず奇数
 Const SIZE As Long = 103
+Public RangeMaze As Range
 
-Public Start As Range
-Public Goal As Range
+Public START As Range
+Public GOAL As Range
 
 Public Get2Start As Boolean
 Public Get2Goal As Boolean
-
-
-Public RangeMaze As Range
 
 '進行候補(水色の部分)を管理
 Public listCandidate() As Range
 
 '色定数
-Const ColorSTART As Long = 65280
-Const ColorGOAL As Long = 255
-
 Const BUILT As Long = 0
 Const BUILDING As Long = 255
 
@@ -30,46 +25,44 @@ Const SEARCHED As Long = 12632256
 Const ROUTE As Long = 16711680
 
 '方角定数
-Const NORTH As Long = 1
-Const EAST As Long = 2
-Const SOUTH As Long = 3
-Const WEST As Long = 4
+Const NORTH As Long = 0
+Const EAST As Long = 1
+Const SOUTH As Long = 2
+Const WEST As Long = 3
 
 Sub main()
+    
+    DefaultHeightWidth
     
     ReDim listCandidate(0 To 0)
     
     Get2Start = False
     Get2Goal = False
-    
-    DefaultHeightWidth
-    
-    Dim Target As Range
 
     Set RangeMaze = Range(Cells(1, 1), Cells(SIZE, SIZE))
     
     Application.StatusBar = "迷路を生成しています..."
     
-    'MakeMaze
     MakeMaze
     
     Application.StatusBar = "スタート/ゴール地点を設定しています..."
 
-    Set Start = Cells(2, 2)
-    Start.Interior.Color = ColorSTART
+    Set START = RangeMaze.Cells(2, 2) '左上端
+    START.Interior.Color = RGB(0, 255, 0)
     
-    Set Goal = Cells(SIZE - 1, SIZE - 1)
-    Goal.Interior.Color = ColorGOAL
+    Set GOAL = RangeMaze.Cells(RangeMaze.Rows.Count - 1, RangeMaze.Columns.Count - 1) '右下端
+    GOAL.Interior.Color = RGB(255, 0, 0)
     
     Application.StatusBar = "最短経路探索を行います..."
         
-    SetNext Start
+    SetNext START
     Do While Get2Start = False
         SetNext GetNext
         DoEvents
     Loop
-        
-    Set Target = Back2Start(Goal)
+    
+    Dim Target As Range
+    Set Target = Back2Start(GOAL)
     Do While Get2Goal = False
         Set Target = Back2Start(Target)
         DoEvents
@@ -81,10 +74,10 @@ End Sub
 
 Function MakeMaze()
 
-    '壁候補(x,yとも奇数かつ枠ではない)を管理
+    '壁候補を管理
     Dim listMakeMaze() As Range
     ReDim listMakeMaze(0 To 0)
-    '建設中の壁(赤)を管理
+    '新規壁を管理
     Dim listBuilding() As Range
     ReDim listBuilding(0 To 0)
     
@@ -94,17 +87,17 @@ Function MakeMaze()
     
     Cells(SIZE + 1, SIZE + 1).Select
     
-    '外周を壁に
+    '外周を壁(既存壁)に
     RangeMaze.Interior.Color = BUILT
     Range(RangeMaze.Cells(2, 2), RangeMaze.Cells(RangeMaze.Rows.Count - 1, RangeMaze.Columns.Count - 1)).ClearFormats
     
     Dim i As Long
     Dim j As Long
-    '壁候補座標のリストを作成
+    
+    '壁候補(x,yとも奇数かつ枠ではない)のリストを作成
     For i = 3 To SIZE - 2 Step 2
         For j = 3 To SIZE - 2 Step 2
             
-            '壁候補(x,yとも奇数かつ枠ではない)を追加
             ReDim Preserve listMakeMaze(0 To UBound(listMakeMaze) + 1)
             Set listMakeMaze(UBound(listMakeMaze)) = Cells(i, j)
             
@@ -118,8 +111,8 @@ Function MakeMaze()
     Dim Selected As Range
     
     Dim temp As Long
-    Dim Direction As Long '方向を決定 '1北・2東・3南・4西
-    Dim CantEnter(1 To 4) As Boolean '進めない場合にtrue
+    Dim Direction As Long
+    Dim CantEnter(NORTH To WEST) As Boolean '進めない場合にtrue
     
     Dim vTemp As Long
     Dim hTemp As Long
@@ -141,7 +134,7 @@ Function MakeMaze()
         hTemp = Selected.Column
         
         '◎壁伸ばし処理
-        '指定座標を壁に
+        '壁候補を新規壁に
         Selected.Interior.Color = BUILDING
         ReDim Preserve listBuilding(0 To UBound(listBuilding) + 1)
         Set listBuilding(UBound(listBuilding)) = Selected
@@ -152,7 +145,7 @@ Function MakeMaze()
         Do While True
         
             Randomize
-            Direction = Int(4 * Rnd + 1)
+            Direction = Int((WEST - NORTH + 1) * Rnd + NORTH)
             
             '進行先の状況を取得
             Select Case Direction
@@ -166,7 +159,8 @@ Function MakeMaze()
                     Set Target = Cells(vTemp, hTemp - 2)
             End Select
             
-            If Target.Interior.Color = BUILT Then '進行先が既存の壁の場合
+            If Target.Interior.Color = BUILT Then '進行先が既存壁の場合
+                '進行先を新規壁にして確定
                 Range(Cells(vTemp, hTemp), Target).Interior.Color = BUILDING
                 
                 ReDim Preserve listBuilding(0 To UBound(listBuilding) + 1)
@@ -174,7 +168,8 @@ Function MakeMaze()
                 
                 Exit Do
                 
-            ElseIf Target.Interior.Color = BUILDING Then '建設中の壁の場合
+            ElseIf Target.Interior.Color = BUILDING Then '新規壁の場合
+                '進行不可フラグを立てる
                 Select Case Direction
                     Case NORTH
                         CantEnter(NORTH) = True
@@ -187,6 +182,7 @@ Function MakeMaze()
                 End Select
             
             Else '通路の場合
+                '進行先を新規壁にする
                 Range(Cells(vTemp, hTemp), Target).Interior.Color = BUILDING
                 
                 ReDim Preserve listBuilding(0 To UBound(listBuilding) + 1)
@@ -194,10 +190,10 @@ Function MakeMaze()
                 
                 '使用された壁候補はリストから削除
                 If UBound(listMakeMaze) <> 1 Then
-                    listMakeMaze = RangeArrDelete(listMakeMaze, Target)
+                    listMakeMaze = ArrDelete(listMakeMaze, Target)
                     Application.StatusBar = "迷路を生成しています... - " & Round((prev - UBound(listMakeMaze)) / prev, 2) * 100 & "%"
                 Else
-                    listMakeMaze = RangeArrDelete(listMakeMaze, Target)
+                    listMakeMaze = ArrDelete(listMakeMaze, Target)
                     Application.StatusBar = "迷路を生成しています... - 100%"
                     Exit Function
                 End If
@@ -209,7 +205,8 @@ Function MakeMaze()
                 
             End If
             
-            If CantEnter(NORTH) = True And CantEnter(EAST) = True And CantEnter(SOUTH) = True And CantEnter(WEST) = True Then 'どの方向にも進めなくなったら新たな候補を取る
+            If CantEnter(NORTH) = True And CantEnter(EAST) = True And CantEnter(SOUTH) = True And CantEnter(WEST) = True Then '全ての方向に進行不可の場合
+                '新規壁を確定して新たな候補を取る
                 Exit Do
             End If
             
@@ -217,7 +214,7 @@ Function MakeMaze()
         Loop
         
         
-        '建設中のリストを全て建設済みに
+        '新規壁を確定
         For i = LBound(listBuilding) + 1 To UBound(listBuilding)
             listBuilding(i).Interior.Color = BUILT
         Next i
@@ -225,10 +222,10 @@ Function MakeMaze()
         
         '使用された壁候補はリストから削除
         If UBound(listMakeMaze) <> 1 Then
-            listMakeMaze = RangeArrDelete(listMakeMaze, Selected)
+            listMakeMaze = ArrDelete(listMakeMaze, Selected)
             Application.StatusBar = "迷路を生成しています... - " & Round((prev - UBound(listMakeMaze)) / prev, 2) * 100 & "%"
         Else
-            listMakeMaze = RangeArrDelete(listMakeMaze, Selected)
+            listMakeMaze = ArrDelete(listMakeMaze, Selected)
             Application.StatusBar = "迷路を生成しています... - 100%"
             Exit Do
         End If
@@ -257,8 +254,7 @@ End Function
 
 '常に0を残しておく必要がある
 '添え字は1から始まる
-'listCandidateからRangeを削除
-Function RangeArrDelete(ByRef arr() As Range, ByVal Target As Range) As Range()
+Function ArrDelete(ByRef arr() As Range, ByVal Target As Range) As Range()
     
     Dim i As Long
     Dim copy() As Range
@@ -279,33 +275,29 @@ Function RangeArrDelete(ByRef arr() As Range, ByVal Target As Range) As Range()
         End If
     Next i
     
-    RangeArrDelete = copy
+    ArrDelete = copy
     
 End Function
 
 Function SetNext(ByVal Target As Range) As Range
     
-    
-    '選択中の色 : 0,255,255
-    '探索済みの色 : 192,192,192
-    
     '左右上下の進行可能セルをマーキング
     
-    Dim Directions(0 To 3) As Range
-    Set Directions(0) = Target.Cells(0, 1)
-    Set Directions(1) = Target.Cells(1, 2)
-    Set Directions(2) = Target.Cells(2, 1)
-    Set Directions(3) = Target.Cells(1, 0)
+    Dim Directions(NORTH To WEST) As Range
+    Set Directions(NORTH) = Target.Cells(0, 1)
+    Set Directions(EAST) = Target.Cells(1, 2)
+    Set Directions(SOUTH) = Target.Cells(2, 1)
+    Set Directions(WEST) = Target.Cells(1, 0)
     
     Dim i As Long
     
-    For i = 0 To 3
-        If Directions(i).Interior.Color = ColorGOAL Then 'ゴールにたどりついた場合
+    For i = NORTH To WEST '四方を探索
+        If Directions(i).Interior.Color = GOAL.Interior.Color Then 'ゴールにたどりついた場合
             AllCellsChecked
             Get2Start = True
             Exit Function
         End If
-        If IsAvailable(Directions(i)) Then '壁か探索済みではない場合
+        If IsAvailable(Directions(i)) Then '壁か探索済みかスタートではない場合
             
             Directions(i).Interior.Color = SEARCHING
             Directions(i).Value = Target.Value + 1
@@ -319,14 +311,15 @@ Function SetNext(ByVal Target As Range) As Range
         End If
     Next i
     
-    If Target.Interior.Color <> Start.Interior.Color Then
+    If Target.Interior.Color <> START.Interior.Color Then
         Target.Interior.Color = SEARCHED
-        listCandidate = RangeArrDelete(listCandidate, Target)
+        listCandidate = ArrDelete(listCandidate, Target)
     End If
     
 End Function
 
 Function GetNext() As Range
+    
     Dim i As Long
     Dim minimum As Long
     minimum = 2147483647
@@ -336,65 +329,59 @@ Function GetNext() As Range
     
     For i = LBound(listCandidate) + 1 To UBound(listCandidate)
         'If minimum >= listcandidate(i).Value + CLng(Sqr((Abs(listcandidate(i).Row - Goal.Row)) ^ 2 + (Abs(listcandidate(i).Row - Goal.Row)) ^ 2)) Then 'スタートからの距離+ゴールまでの距離(直線距離)
-        If minimum >= listCandidate(i).Value + Abs(listCandidate(i).Row - Goal.Row) + Abs(listCandidate(i).Row - Goal.Row) Then 'スタートからの距離+ゴールまでの距離(辺の合計)
-            minimum = listCandidate(i).Value + CLng(Sqr((Abs(listCandidate(i).Row - Goal.Row)) ^ 2 + (Abs(listCandidate(i).Row - Goal.Row)) ^ 2))
+        If minimum >= listCandidate(i).Value + Abs(listCandidate(i).Row - GOAL.Row) + Abs(listCandidate(i).Row - GOAL.Row) Then 'スタートからの距離+ゴールまでの距離(辺の合計)
+            minimum = listCandidate(i).Value + CLng(Sqr((Abs(listCandidate(i).Row - GOAL.Row)) ^ 2 + (Abs(listCandidate(i).Row - GOAL.Row)) ^ 2))
             
             Set GetNext = listCandidate(i)
             
         End If
-    Next
+    Next i
     
 End Function
 
+'壁か探索済みかスタートではない場合true
 Function IsAvailable(ByVal Target As Range) As Boolean
-    
-    If Target.Interior.Color <> BUILT And Target.Interior.Color <> SEARCHING And Target.Interior.Color <> SEARCHED And Target.Interior.Color <> ColorSTART Then
+    If Target.Interior.Color <> BUILT And Target.Interior.Color <> SEARCHING And Target.Interior.Color <> SEARCHED And Target.Interior.Color <> START.Interior.Color Then
         IsAvailable = True
     End If
-    
 End Function
 
-'再帰でスタートまで帰る
+'スタートまで帰る
 Function Back2Start(ByVal Target As Range) As Range
     
-    Dim Directions(0 To 3) As Range
-    Set Directions(0) = Target.Cells(0, 1)
-    Set Directions(1) = Target.Cells(1, 2)
-    Set Directions(2) = Target.Cells(2, 1)
-    Set Directions(3) = Target.Cells(1, 0)
+    Dim Directions(NORTH To WEST) As Range
+    Set Directions(NORTH) = Target.Cells(0, 1)
+    Set Directions(EAST) = Target.Cells(1, 2)
+    Set Directions(SOUTH) = Target.Cells(2, 1)
+    Set Directions(WEST) = Target.Cells(1, 0)
     
     Dim i As Long
+    Dim val(NORTH To WEST) As Long
     
-    For i = 0 To 3 '4方向にスタートがあれば終了
-        If Directions(i).Interior.Color = ColorSTART Then
+    For i = NORTH To WEST '4方向にスタートがあれば終了
+        If Directions(i).Interior.Color = START.Interior.Color Then
             Get2Goal = True
             Exit Function
         End If
-    Next i
-    
-    Dim val(0 To 3) As Long '各セルの値(スタートまでの距離)が最も短いものを選択
-    For i = 0 To 3
-        val(i) = CastValue(Directions(i).Value)
+        
+        val(i) = CastValue(Directions(i).Value) '各セルの値(スタートまでの距離)を格納
+        
     Next i
     
     Dim s As Long
-    s = Smallest(val)
-    Directions(s).Interior.Color = RGB(0, 0, 255)
+    s = Smallest(val) '各セルの値が最も小さいものを選択
+    Directions(s).Interior.Color = ROUTE
     
     Set Back2Start = Directions(s)
     
 End Function
 
-'選択中の水色セルを全て灰色にする
+'探索中を探索済みにする
 Function AllCellsChecked()
-    Dim cell As Range
-    
-    For Each cell In RangeMaze
-        If cell.Interior.Color = SEARCHING Then
-            cell.Interior.Color = SEARCHED
-        End If
-    Next
-    
+    Dim i As Long
+    For i = LBound(listCandidate) + 1 To UBound(listCandidate)
+        listCandidate(i).Interior.Color = SEARCHED
+    Next i
 End Function
 
 '配列のうち最小の値が入っている添え字を返す
@@ -413,6 +400,7 @@ Function Smallest(ByRef arr() As Long) As Long
 End Function
 
 '空白文字をLong型の最大値にして返す
+'空白文字のセル(壁か未探索)を辿らないようにするため
 Function CastValue(ByVal str As String) As Long
     If str = "" Or str = vbNullString Then
         CastValue = 2147483647
