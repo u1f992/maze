@@ -103,7 +103,7 @@ Function MakeMaze()
             
         Next j
     Next i
-        
+    
     Dim prev As Long
     prev = UBound(listMakeMaze) - 1
     Application.StatusBar = "–À˜H‚ğ¶¬‚µ‚Ä‚¢‚Ü‚·... - 0%"
