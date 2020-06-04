@@ -11,21 +11,21 @@ Function MakeMaze()
     ReDim TempWalls(0 To 0)
     
     '–À˜H‚Ì‰Šú‰»
-    RangeMaze.Rows.RowHeight = 5 * 0.75
-    RangeMaze.Columns.ColumnWidth = 5 * 0.07
+    RangeMaze.Rows.RowHeight = 3 * 0.75
+    RangeMaze.Columns.ColumnWidth = 3 * 0.07
     
-    Cells(SIZE + 1, SIZE + 1).Select
+    RangeMaze.Cells(RangeMaze.Rows.Count + 1, RangeMaze.Columns.Count + 1).Select
     
     'ŠOü‚ğ•Ç(Šù‘¶•Ç)‚É
     RangeMaze.Interior.Color = BUILT
-    Range(RangeMaze.Cells(2, 2), RangeMaze.Cells(RangeMaze.Rows.Count - 1, RangeMaze.Columns.Count - 1)).ClearFormats
+    Range(RangeMaze.Cells(2, 2), RangeMaze.Cells(RangeMaze.Rows.Count - 1, RangeMaze.Columns.Count - 1)).Interior.Color = GROUND
     
     Dim i As Long
     Dim j As Long
     
     '•ÇŒó•â(x,y‚Æ‚àŠï”‚©‚Â˜g‚Å‚Í‚È‚¢)‚ÌƒŠƒXƒg‚ğì¬
-    For i = 3 To SIZE - 2 Step 2
-        For j = 3 To SIZE - 2 Step 2
+    For i = RangeMaze.Cells(3, 3).Row To RangeMaze.Cells(RangeMaze.Rows.Count - 2, RangeMaze.Columns.Count - 2).Row Step 2
+        For j = RangeMaze.Cells(3, 3).Column To RangeMaze.Cells(RangeMaze.Rows.Count - 2, RangeMaze.Columns.Count - 2).Column Step 2
             
             Knots = ArrAdd(Knots, Cells(i, j))
             

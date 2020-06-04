@@ -6,8 +6,9 @@ Sub Main()
     DefaultHeightWidth
     
     ReDim TempSearch(0 To 0)
-
-    Set RangeMaze = Range(Cells(1, 1), Cells(SIZE, SIZE))
+    
+    Set Corner = Cells(2, 2)
+    Set RangeMaze = Range(Corner, Cells(SIZE + Corner.Row - 1, SIZE + Corner.Column - 1))
     
     Application.StatusBar = "–À˜H‚ğ¶¬‚µ‚Ä‚¢‚Ü‚·..."
     

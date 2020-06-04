@@ -3,13 +3,16 @@ Option Explicit
 
 '–À˜H‚Ì1•Ó
 '•K‚¸Šï”
-Public Const SIZE As Long = 103
+Public Const SIZE As Long = 181
+Public Corner As Range
 Public RangeMaze As Range
 
 Public START As Range
 Public GOAL As Range
 
 'F’è”
+Public Const GROUND As Long = 16777215
+
 Public Const BUILT As Long = 0
 Public Const BUILDING As Long = 255
 

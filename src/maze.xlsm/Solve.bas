@@ -45,20 +45,48 @@ End Function
 Function SearchGet() As Range
     
     Dim i As Long
-    Dim minimum As Long
-    minimum = 2147483647
+    Dim Minimum As Long
+    Minimum = 2147483647
+    Dim Maximum As Long
+    Maximum = 0
+    
+    Dim Minimums() As Range
+    ReDim Minimums(0 To 0)
+    
+    Dim Evaluation As Long
     
     Dim vTemp As Long
     Dim hTemp As Long
     
     For i = LBound(TempSearch) + 1 To UBound(TempSearch)
-        'If minimum >= TempSearch(i).Value + CLng(Sqr((Abs(TempSearch(i).Row - Goal.Row)) ^ 2 + (Abs(TempSearch(i).Row - Goal.Row)) ^ 2)) Then 'スタートからの距離+ゴールまでの距離(直線距離)
-        If minimum >= TempSearch(i).Value + Abs(TempSearch(i).Row - GOAL.Row) + Abs(TempSearch(i).Row - GOAL.Row) Then 'スタートからの距離+ゴールまでの距離(辺の合計)
-            minimum = TempSearch(i).Value + CLng(Sqr((Abs(TempSearch(i).Row - GOAL.Row)) ^ 2 + (Abs(TempSearch(i).Row - GOAL.Row)) ^ 2))
+    
+        Evaluation = TempSearch(i).Value + Abs(TempSearch(i).Row - GOAL.Row) + Abs(TempSearch(i).Row - GOAL.Row) 'スタートからの距離+ゴールまでの距離(辺の合計)
+        'TempSearch(i).Value + CLng(Sqr((Abs(TempSearch(i).Row - Goal.Row)) ^ 2 + (Abs(TempSearch(i).Row - Goal.Row)) ^ 2)) Then 'スタートからの距離+ゴールまでの距離(直線距離)
+        
+        If Minimum >= Evaluation Then
             
-            Set SearchGet = TempSearch(i)
+            If Minimum > Evaluation Then '最小を更新する場合
+                Minimum = Evaluation
+                ReDim Minimums(0 To 0)
+                Minimums = ArrAdd(Minimums, TempSearch(i))
+            Else '最小に並ぶものを見つけた場合
+                Minimums = ArrAdd(Minimums, TempSearch(i))
+            End If
             
         End If
+    Next i
+    
+    For i = LBound(Minimums) + 1 To UBound(Minimums)
+        
+        Evaluation = Minimums(i).Value
+        
+        If Maximum < Evaluation Then 'スタートからの位置が一番遠いものを探す(等しい場合は最初に見つけたものになる)
+            Maximum = Evaluation
+            
+            Set SearchGet = Minimums(i)
+            
+        End If
+        
     Next i
     
 End Function
