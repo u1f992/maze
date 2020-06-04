@@ -1,10 +1,9 @@
 Attribute VB_Name = "Module1"
 Option Explicit
 
-'迷路の内側の1辺
+'迷路の1辺
 '必ず奇数
-'迷路全体のサイズはsize+2になる
-Const size As Long = 101
+Const SIZE As Long = 103
 
 Public Start As Range
 Public Goal As Range
@@ -19,9 +18,18 @@ Public RangeMaze As Range
 Public listCandidate() As Range
 
 '色定数
-Const BUILT As Long = 0 '建設済み
-Const BUILDING As Long = 255 '建設中
+Const ColorSTART As Long = 65280
+Const ColorGOAL As Long = 255
 
+Const BUILT As Long = 0
+Const BUILDING As Long = 255
+
+Const SEARCHING As Long = 16776960
+Const SEARCHED As Long = 12632256
+
+Const ROUTE As Long = 16711680
+
+'方角定数
 Const NORTH As Long = 1
 Const EAST As Long = 2
 Const SOUTH As Long = 3
@@ -38,7 +46,7 @@ Sub main()
     
     Dim Target As Range
 
-    Set RangeMaze = Range(Cells(1, 1), Cells(size + 2, size + 2))
+    Set RangeMaze = Range(Cells(1, 1), Cells(SIZE, SIZE))
     
     Application.StatusBar = "迷路を生成しています..."
     
@@ -48,10 +56,10 @@ Sub main()
     Application.StatusBar = "スタート/ゴール地点を設定しています..."
 
     Set Start = Cells(2, 2)
-    Start.Interior.Color = RGB(0, 255, 0)
+    Start.Interior.Color = ColorSTART
     
-    Set Goal = Cells(size + 1, size + 1)
-    Goal.Interior.Color = RGB(255, 0, 0)
+    Set Goal = Cells(SIZE - 1, SIZE - 1)
+    Goal.Interior.Color = ColorGOAL
     
     Application.StatusBar = "最短経路探索を行います..."
         
@@ -84,7 +92,7 @@ Function MakeMaze()
     RangeMaze.Rows.RowHeight = 5 * 0.75
     RangeMaze.Columns.ColumnWidth = 5 * 0.07
     
-    Cells(size + 3, size + 3).Select
+    Cells(SIZE + 1, SIZE + 1).Select
     
     '外周を壁に
     RangeMaze.Interior.Color = BUILT
@@ -93,8 +101,8 @@ Function MakeMaze()
     Dim i As Long
     Dim j As Long
     '壁候補座標のリストを作成
-    For i = 3 To size Step 2
-        For j = 3 To size Step 2
+    For i = 3 To SIZE - 2 Step 2
+        For j = 3 To SIZE - 2 Step 2
             
             '壁候補(x,yとも奇数かつ枠ではない)を追加
             ReDim Preserve listMakeMaze(0 To UBound(listMakeMaze) + 1)
@@ -292,14 +300,14 @@ Function SetNext(ByVal Target As Range) As Range
     Dim i As Long
     
     For i = 0 To 3
-        If Directions(i).Interior.Color = RGB(255, 0, 0) Then 'ゴールにたどりついた場合
+        If Directions(i).Interior.Color = ColorGOAL Then 'ゴールにたどりついた場合
             AllCellsChecked
             Get2Start = True
             Exit Function
         End If
         If IsAvailable(Directions(i)) Then '壁か探索済みではない場合
             
-            Directions(i).Interior.Color = RGB(0, 255, 255)
+            Directions(i).Interior.Color = SEARCHING
             Directions(i).Value = Target.Value + 1
             
             '添え字は1から始まる、0には空白のデータ
@@ -312,7 +320,7 @@ Function SetNext(ByVal Target As Range) As Range
     Next i
     
     If Target.Interior.Color <> Start.Interior.Color Then
-        Target.Interior.Color = RGB(192, 192, 192)
+        Target.Interior.Color = SEARCHED
         listCandidate = RangeArrDelete(listCandidate, Target)
     End If
     
@@ -321,7 +329,7 @@ End Function
 Function GetNext() As Range
     Dim i As Long
     Dim minimum As Long
-    minimum = (size + 2) ^ 2
+    minimum = 2147483647
     
     Dim vTemp As Long
     Dim hTemp As Long
@@ -340,7 +348,7 @@ End Function
 
 Function IsAvailable(ByVal Target As Range) As Boolean
     
-    If Target.Interior.Color <> RGB(0, 0, 0) And Target.Interior.Color <> RGB(0, 255, 255) And Target.Interior.Color <> RGB(192, 192, 192) And Target.Interior.Color <> RGB(0, 255, 0) Then
+    If Target.Interior.Color <> BUILT And Target.Interior.Color <> SEARCHING And Target.Interior.Color <> SEARCHED And Target.Interior.Color <> ColorSTART Then
         IsAvailable = True
     End If
     
@@ -358,7 +366,7 @@ Function Back2Start(ByVal Target As Range) As Range
     Dim i As Long
     
     For i = 0 To 3 '4方向にスタートがあれば終了
-        If Directions(i).Interior.Color = RGB(0, 255, 0) Then
+        If Directions(i).Interior.Color = ColorSTART Then
             Get2Goal = True
             Exit Function
         End If
@@ -382,8 +390,8 @@ Function AllCellsChecked()
     Dim cell As Range
     
     For Each cell In RangeMaze
-        If cell.Interior.Color = RGB(0, 255, 255) Then
-            cell.Interior.Color = RGB(192, 192, 192)
+        If cell.Interior.Color = SEARCHING Then
+            cell.Interior.Color = SEARCHED
         End If
     Next
     
