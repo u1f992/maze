@@ -1,4 +1,4 @@
-Attribute VB_Name = "main"
+Attribute VB_Name = "Main"
 Option Explicit
 
 Sub Main()
@@ -9,19 +9,19 @@ Sub Main()
 
     Set RangeMaze = Range(Cells(1, 1), Cells(SIZE, SIZE))
     
-    Application.StatusBar = "–À˜H‚ğ¶¬‚µ‚Ä‚¢‚Ü‚·..."
+    Application.StatusBar = "ï¿½ï¿½ï¿½Hï¿½ğ¶ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½Ü‚ï¿½..."
     
     MakeMaze
     
-    Application.StatusBar = "ƒXƒ^[ƒg/ƒS[ƒ‹’n“_‚ğİ’è‚µ‚Ä‚¢‚Ü‚·..."
+    Application.StatusBar = "ï¿½Xï¿½^ï¿½[ï¿½g/ï¿½Sï¿½[ï¿½ï¿½ï¿½nï¿½_ï¿½ï¿½İ’è‚µï¿½Ä‚ï¿½ï¿½Ü‚ï¿½..."
 
-    Set START = RangeMaze.Cells(2, 2) '¶ã’[
+    Set START = RangeMaze.Cells(2, 2) 'ï¿½ï¿½ï¿½ï¿½[
     START.Interior.Color = RGB(0, 255, 0)
     
-    Set GOAL = RangeMaze.Cells(RangeMaze.Rows.Count - 1, RangeMaze.Columns.Count - 1) '‰E‰º’[
+    Set GOAL = RangeMaze.Cells(RangeMaze.Rows.Count - 1, RangeMaze.Columns.Count - 1) 'ï¿½Eï¿½ï¿½ï¿½[
     GOAL.Interior.Color = RGB(255, 0, 0)
     
-    Application.StatusBar = "Å’ZŒo˜H’Tõ‚ğs‚¢‚Ü‚·..."
+    Application.StatusBar = "ï¿½Å’Zï¿½oï¿½Hï¿½Tï¿½ï¿½ï¿½ï¿½ï¿½sï¿½ï¿½ï¿½Ü‚ï¿½..."
         
     SearchSet START
     Do While SearchSet(SearchGet) = False
@@ -33,7 +33,7 @@ Sub Main()
         DoEvents
     Loop
     
-    Application.StatusBar = "Å’ZŒo˜H‚ğ’Tõ‚µ‚Ü‚µ‚½B"
+    Application.StatusBar = "ï¿½Å’Zï¿½oï¿½Hï¿½ï¿½Tï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½ï¿½B"
     
 End Sub
 
