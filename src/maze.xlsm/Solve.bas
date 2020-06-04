@@ -60,8 +60,8 @@ Function SearchGet() As Range
     
     For i = LBound(TempSearch) + 1 To UBound(TempSearch)
     
-        Evaluation = TempSearch(i).Value + Abs(TempSearch(i).Row - GOAL.Row) + Abs(TempSearch(i).Row - GOAL.Row) 'スタートからの距離+ゴールまでの距離(辺の合計)
-        'TempSearch(i).Value + CLng(Sqr((Abs(TempSearch(i).Row - Goal.Row)) ^ 2 + (Abs(TempSearch(i).Row - Goal.Row)) ^ 2)) Then 'スタートからの距離+ゴールまでの距離(直線距離)
+        Evaluation = TempSearch(i).Value + Abs(TempSearch(i).Row - GOAL.Row) + Abs(TempSearch(i).Row - GOAL.Row)  'スタートからの距離+ゴールまでの距離(辺の合計)
+        'TempSearch(i).Value + CLng(Sqr((Abs(TempSearch(i).Row - GOAL.Row)) ^ 2 + (Abs(TempSearch(i).Row - GOAL.Row)) ^ 2)) 'スタートからの距離+ゴールまでの距離(直線距離)
         
         If Minimum >= Evaluation Then
             

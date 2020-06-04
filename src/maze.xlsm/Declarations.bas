@@ -3,9 +3,11 @@ Option Explicit
 
 '–À˜H‚Ì1•Ó
 '•K‚¸Šï”
-Public Const SIZE As Long = 181
+Public Const SIZE As Long = 501
 Public Corner As Range
 Public RangeMaze As Range
+
+Public Const RATE As Long = 1
 
 Public START As Range
 Public GOAL As Range

@@ -11,8 +11,8 @@ Function MakeMaze()
     ReDim TempWalls(0 To 0)
     
     '–À˜H‚Ì‰Šú‰»
-    RangeMaze.Rows.RowHeight = 3 * 0.75
-    RangeMaze.Columns.ColumnWidth = 3 * 0.07
+    RangeMaze.Rows.RowHeight = RATE * 0.75
+    RangeMaze.Columns.ColumnWidth = RATE * 0.07
     
     RangeMaze.Cells(RangeMaze.Rows.Count + 1, RangeMaze.Columns.Count + 1).Select
     
